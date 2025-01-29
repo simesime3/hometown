@@ -1,0 +1,21 @@
+/* Header.module.css */
+.header-container {
+    width: 100%;
+    background-color: #3b82f6; /* bg-blue-500と同等の色 */
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 1rem; /* rounded-xl */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-lg */
+  }
+  
+  .header-title {
+    font-size: 1.25rem; /* text-lg */
+  }
+  
+  .header-button {
+    margin-left: 1rem; /* ml-4 */
+  }
+  

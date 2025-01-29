@@ -1,0 +1,14 @@
+/* Footer.module.css */
+.footer-container {
+    width: 100%;
+    margin-top: 1.5rem; /* mt-6 */
+    padding: 1rem 1.5rem; /* py-4 px-6 */
+    background-color: #e5e7eb; /* bg-gray-200 */
+    border-radius: 1rem; /* rounded-xl */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-lg */
+  }
+  
+  .footer-button {
+    width: 100%;
+  }
+  
