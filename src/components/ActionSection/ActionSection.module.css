@@ -1,0 +1,44 @@
+/* ActionSection.module.css */
+
+.action-section-container {
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width:400px;
+  margin: 0 auto;
+}
+
+.error-message {
+  color: #ff4d4d; /* エラーは赤色で表示 */
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.total-amount {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.purchase-button {
+  background-color: #4caf50; /* 購入ボタンは緑色 */
+  color: white;
+  font-size: 16px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.purchase-button:hover {
+  background-color: #45a049; /* ホバー時に少し暗く */
+}
+
+.purchase-button:active {
+  background-color: #388e3c; /* クリック時の暗い色 */
+}

@@ -1,44 +1,104 @@
+/* ListSection.module.css */
 .list-section-container {
-  padding: 16px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.products-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.product-list {
+  width: 50%;
+}
+
+.product-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  background-color: #f9f9f9;
+  transition: box-shadow 0.3s ease;
+}
+
+.product-item:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.product-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.product-price {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #777;
+}
+
+.add-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: #0056b3;
+}
+
+.cart {
+  width: 35%;
+  padding: 15px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #f9f9f9;
 }
 
-.product-list {
-  list-style: none;
+.cart-list {
+  list-style-type: none;
   padding: 0;
-  margin: 0;
 }
 
-.product-item {
+.cart-list .product-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  background-color: #fff;
+  margin-bottom: 10px;
 }
 
-.product-name {
-  flex: 1;
+.cart-list .product-name {
   font-size: 16px;
-  font-weight: bold;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  text-align: center;
-  margin-right: 8px;
 }
 
-.product-price {
-  flex: 1;
+.cart-list .product-price {
+  font-size: 14px;
+  color: #777;
+}
+
+.purchase-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
   font-size: 16px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  text-align: center;
-  background-color: #f0f8ff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.purchase-button:hover {
+  background-color: #45a049;
 }
