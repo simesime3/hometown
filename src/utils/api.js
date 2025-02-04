@@ -1,4 +1,4 @@
-const backend_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const backend_URL = process.env.NEXT_PUBLIC_BACKEND_URL; //GitHub Actions
 console.log('backend_URL:', backend_URL); // backend_URL を確認
 
 export const fetchProduct = async (code) => {
