@@ -1,10 +1,41 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# OS 固有のファイル
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
 
+# IDE 固有のファイル
+.idea/
+.vscode/
+*.suo
+*.user
 
+# ログファイル
+*.log
+*.out
+*.dump
 
-# local env files
-.env*.local
-.env
-backend/.env
-
+# 依存関係管理ツールが生成するファイル
 node_modules/
+vendor/
+target/
+build/
+dist/
+*.pyc
+__pycache__/
+
+# 環境ファイル
+.env
+*.config
+secrets.json
+
+# 一時ファイル
+*.tmp
+*.swp
+
+# その他
+*.zip
+*.rar
+*.7z
+.history
+.next/

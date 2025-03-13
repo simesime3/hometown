@@ -1,0 +1,95 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import styles from "./Map.module.css";
+
+export default function MapComponent() {
+  const mapRef = useRef(null);
+  const geojsonLayerRef = useRef(null);
+  const labelGroupRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !mapRef.current) {
+      const map = L.map('map').setView([35.6895, 139.6917], 5);
+      mapRef.current = map;
+
+      L.tileLayer('/data/jp.svg', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      geojsonLayerRef.current = L.geoJSON(null, {
+        style: {
+          fillColor: 'blue',
+          fillOpacity: 0.1,
+          color: 'black',
+          weight: 1
+        },
+        onEachFeature: (feature, layer) => {
+          layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.5 }));
+          layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.1 }));
+        }
+      }).addTo(map);
+
+      labelGroupRef.current = L.layerGroup().addTo(map);
+      map.removeLayer(labelGroupRef.current); // 初期状態では非表示
+
+      fetch('/data/geo.json')
+        .then(response => {
+          if (!response.ok) throw new Error('GeoJSONの読み込みに失敗しました');
+          return response.json();
+        })
+        .then(data => {
+          geojsonLayerRef.current.addData(data);
+          updateLabels();
+        })
+        .catch(error => console.error('Error:', error));
+
+      const zoomThreshold = 8;
+      map.on('zoomend', () => {
+        const zoom = map.getZoom();
+        if (zoom > zoomThreshold) {
+          // ラベルを更新
+          updateLabels();
+      
+          // ラベルのスタイルを更新
+          updateLabelStyles(zoom);
+      
+          // ラベルグループを地図に追加
+          labelGroupRef.current.addTo(map);
+        } else {
+          // ラベルグループを地図から削除
+          map.removeLayer(labelGroupRef.current);
+        }
+      });
+
+      function updateLabels() {
+        labelGroupRef.current.clearLayers();
+        geojsonLayerRef.current.eachLayer(layer => {
+          if (layer.feature.properties) {
+            const center = layer.getBounds().getCenter();
+            const label = L.marker(center, {
+              icon: L.divIcon({
+                html: layer.feature.properties.laa || '',
+                className: 'label',
+                iconSize: [100, 20],
+                iconAnchor: [50, 10]
+              })
+            });
+            label.addTo(labelGroupRef.current);
+          }
+        });
+        updateLabelStyles(map.getZoom());
+      }
+
+      function updateLabelStyles(zoom) {
+        labelGroupRef.current.eachLayer(marker => {
+          marker._icon.style.fontSize = `${12 + zoom}px`;
+        });
+      }
+    }
+  }, []);
+
+  return <div id="map" style={{ width: '100%', height: '500px' }}></div>;
+}

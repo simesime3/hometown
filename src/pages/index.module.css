@@ -1,0 +1,15 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* 画面全体の高さ */
+  }
+  
+  .header {
+    background-color: #f0f0f0;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .main {
+    flex-grow: 1; /* 残りの領域をメインコンテンツが占める */
+  }
