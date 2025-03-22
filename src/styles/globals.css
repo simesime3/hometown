@@ -1,0 +1,25 @@
+/* グローバルリセット */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* HTML, Body のデフォルト設定 */
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* 横スクロールを防ぐ */
+    font-family: Arial, sans-serif;
+  }
+  
+  /* a タグのデフォルトスタイル */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .leaflet-control-zoom {
+    top: 80px !important; /* ヘッダーの高さ + 余白 */
+  }
+  
