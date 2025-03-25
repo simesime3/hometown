@@ -27,7 +27,7 @@ export default function Map() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !mapRef.current) {
-      const map = L.map('map', { scrollWheelZoom: true }).setView([35.6895, 139.6917], 5);
+      const map = L.map('map', { scrollWheelZoom: true, attributionControl: false }).setView([35.6895, 139.6917], 5);
       mapRef.current = map;
 
       L.tileLayer('https://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {
@@ -53,24 +53,27 @@ export default function Map() {
 
               layer.setStyle({ fillColor: 'red', fillOpacity: 0.5 }); // クリックしたエリアを赤にする
             
-            console.log("click");
-            const popupContent = `
-              <div>
-                <h2>${feature.properties.laa}</h2>
-                <p>laa: ${feature.properties.laa || '情報なし'}</p>
-              </div>
-            `;
-            setPopupData({ latlng, content: popupContent });
+            const prefectureName = feature.properties.N03_001; // 県
+            const cityName = feature.properties.N03_004; // 市区町村名を取得
+
+            console.log("クリックした市区町村:", cityName);
+  
+              const popupContent = `
+                <div>
+                  <h2>${prefectureName}　${cityName}</h2>
+                </div>
+              `;
+              setPopupData({ latlng, content: popupContent });
 
             openModal({
-              title: feature.properties.laa,
+              prefectureName: prefectureName,
+              cityName: cityName, 
               button1: 'この自治体のおうえんレポートを見る',
               button2: 'この自治体の返礼品を探す',
               button3: 'この自治体への旅行プランを探す',
               button4: 'この自治体の名所・名産品を見る',
               supportCount: `おうえん登録数: ${Math.floor(Math.random() * 200)}`,
               supportButton: '♡',
-              laa: feature.properties.laa || '情報なし'
             });
           });
         }
@@ -84,7 +87,8 @@ export default function Map() {
         // ラベルの更新処理を記述
       }
 
-      fetch('/assets/data/geo.json')
+      fetch('/assets/data/japan-municipalities.geojson')
+      // fetch('/assets/data/ japan-municipalities.geojson')
         .then(response => {
           if (!response.ok) throw new Error('GeoJSONの読み込みに失敗しました');
           return response.json();

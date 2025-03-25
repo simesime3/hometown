@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./Header.module.css";
 import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";  // マイページアイコン
 
-const Header = () => {
+const Header = ({ onHeightChange }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef(null);  // refを使ってheaderの高さを取得
+
+  // ヘッダーの高さを親コンポーネントに伝える
+  useEffect(() => {
+    if (headerRef.current && onHeightChange) {
+      onHeightChange(headerRef.current.offsetHeight); // 親に高さを通知
+    }
+  }, [onHeightChange]);
 
   return (
-    <header className={styles.header}>
+    <header ref={headerRef} className={styles.header}>
       <div className={styles.leftSection}>
         {/* マイページアイコン */}
         <Link href="/mypage" className={styles.mypageIcon}>
@@ -16,7 +24,7 @@ const Header = () => {
         {/* ロゴ */}
         <img 
           src="/assets/images/logo.png"  // 画像ファイルのパス
-          // alt="My Travel App Logo"
+          alt="My Travel App Logo"
           className={styles.logo} // スタイルを適用
         />
       </div>

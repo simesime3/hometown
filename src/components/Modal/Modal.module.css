@@ -1,4 +1,6 @@
 .modal {
+  z-index: 9999;
+  pointer-events: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -7,16 +9,23 @@
   display: flex;
   justify-content: center;
   align-items: flex-end; /* モーダルを下部に配置 */
+  visibility: hidden; /* 初期状態では非表示 */
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease; /* フェードイン・フェードアウトの効果 */
 }
 
 .modal.open {
-  opacity: 1; /*  要素の透明度 */
-  visibility: visible;
+  opacity: 1;
+  visibility: visible; /* 要素が表示される */
 }
 
 .modal-content {
+  z-index: 9999; /* モーダル本体を最前面に */
+  position: relative;
+  pointer-events: auto; /* モーダル内部はクリック可能 */
   height: auto;  /* 自動で高さ調整 */
-  background: white;
+  background: white !important; /* 強制的に不透明にする */
+  opacity: 1 !important; /* 完全に不透明に */
   padding: 20px;
   border-radius: 10px 10px 0 0; /* 上部の角を丸める */
   position: absolute;
@@ -30,6 +39,11 @@
   position: absolute;
   top: 10px;
   right: 10px;
+  font-size: 20px;
+  color: #333;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .modal-header h2 {
@@ -44,13 +58,19 @@
 }
 
 .modal-button {
-  padding: 10px;
+  padding: 12px;
   background-color: #00aaff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   text-align: center;
+  font-size: 16px;
+  transition: background-color 0.3s ease; /* ボタンの背景色変更効果 */
+}
+
+.modal-button:hover {
+  background-color: #0088cc; /* ホバー時の色 */
 }
 
 .modal-footer {
@@ -61,12 +81,36 @@
 }
 
 .modal-support-button {
-  padding: 5px 10px;
+  padding: 6px 12px;
   background-color: transparent;
+  color: #00aaff;
+  border: 2px solid #00aaff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-support-button:hover {
+  background-color: #00aaff;
+  color: white;
 }
 
 @media (max-width: 768px) {
   .modal {
     align-items: flex-end; /* モバイル端末でも下部に配置 */
+  }
+
+  .modal-content {
+    max-width: 100%; /* モバイルで幅を100%に設定 */
+    border-radius: 0;
+    padding: 15px;
+  }
+
+  .modal-button {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .modal-support-button {
+    padding: 6px 10px;
   }
 }
