@@ -19,14 +19,16 @@ const Header = ({ onHeightChange }) => {
       <div className={styles.leftSection}>
         {/* マイページアイコン */}
         <Link href="/mypage" className={styles.mypageIcon}>
-          <FaUserCircle size={32} />
+          <FaUserCircle size={32} color="black"/>
         </Link>
         {/* ロゴ */}
-        <img 
-          src="/assets/images/logo.png"  // 画像ファイルのパス
-          alt="My Travel App Logo"
-          className={styles.logo} // スタイルを適用
-        />
+        <div className={styles.logoContainer}>
+          <img 
+            src="/assets/images/logo.png"
+            alt="My Travel App Logo"
+            className={styles.logo} 
+          />
+        </div>
       </div>
 
       {/* ハンバーガーメニュー */}

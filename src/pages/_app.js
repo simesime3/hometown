@@ -6,9 +6,9 @@ function MyApp({ Component, pageProps }) {
   return (
     <>
       <Header />  {/* すべてのページにヘッダーを適用 */}
-      <main style={{ paddingTop: "60px" }}>
+
         <Component {...pageProps} />
-      </main>
+
     </>
   );
 }

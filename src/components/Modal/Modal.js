@@ -76,7 +76,7 @@ function Modal({ isOpen, onClose, data }) {
       <div className={styles['modal-content']}>
         <button className={styles['modal-close']} onClick={onClose}>×</button>
         <div className={styles['modal-header']}>
-          <h2>{data.title}</h2>
+          <h2>{data.prefectureName} {data.cityName}</h2>
         </div>
         <div className={styles['modal-body']}>
           <button className={styles['modal-button']} onClick={() => handleButtonClick('report')}>{data.button1}</button>

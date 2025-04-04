@@ -12,6 +12,7 @@ function Information({ cityDetails, onClose, selectedButton }) {
   // ヘッダーから高さを取得する関数
   const handleHeaderHeightChange = (height) => {
     setHeaderHeight(height); // 親コンポーネントで高さを管理
+    console.log(cityDetails);
   };
 
   // cityDetailsが渡されていない場合、nullを返す
@@ -36,13 +37,18 @@ function Information({ cityDetails, onClose, selectedButton }) {
   return (
     <div className={styles['information-container']}>
       {/* オーバーレイをクリックするとモーダルが閉じる */}
-      <div className={styles['information-overlay']} onClick={onClose}></div>
+      <div className={styles['information-overlay']} onClick={onClose}>
+      </div>
       <div
         className={styles['information-content']}
         style={{ height: `calc(100vh - ${headerHeight}px)` }} // ヘッダーの高さを引いてコンテンツの高さを調整
       >
-        {/* 閉じるボタン */}
-        <button className={styles['information-close']} onClick={onClose}>×</button>
+        {/* 閉じるボタンと市町村名を横並びに配置 */}
+        <div className={styles['information-header']}>
+          <button className={styles['information-close']} onClick={onClose}>×</button>
+          <div className={styles['city-name']}>{cityDetails.prefectureName} {cityDetails.name}</div>
+        </div>
+        
         {/* Headerコンポーネントに高さ変更関数を渡す */}
         <Header onHeightChange={handleHeaderHeightChange} />
         <div className={styles['information-body']}>
