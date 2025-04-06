@@ -3,12 +3,11 @@
     "version": "1.0.0",
     "description": "Your project description",
         "main": "index.js",
-    "scripts": {
-    "start": "next start -p $PORT",
-    "dev": "next dev",
-    "build": "next build",
-    "lint": "next lint"
-    },
+        "scripts": {
+            "dev": "next dev",
+            "build": "next build",
+            "start": "node server.js" // カスタムサーバーを使用するためのスタートコマンド
+        },
     "author": "Your Name",
     "license": "ISC",
     "dependencies": {
