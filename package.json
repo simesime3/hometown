@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "start": "node index.js"
+        "next start"
     },
     "author": "Your Name",
     "license": "ISC",
