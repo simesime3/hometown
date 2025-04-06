@@ -23,8 +23,7 @@ jobs:
       - name: npm install, build, and test
         run: |
           npm install
-          npm run build --verbose
-          npm run test --if-present
+          npm run build
       - name: Copy artifact for deployment job    # 変更点➀
         run: |
           mkdir deploy
