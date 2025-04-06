@@ -2,12 +2,12 @@
     "name": "your-project-name",
     "version": "1.0.0",
     "description": "Your project description",
-    "main": "index.js",
+        "main": "index.js",
     "scripts": {
-        "start": "next start -p $PORT",
-        "dev": "next dev",
-        "build": "react-scripts build",
-        "lint": "next lint"
+    "start": "next start -p $PORT",
+    "dev": "next dev",
+    "build": "next build",
+    "lint": "next lint"
     },
     "author": "Your Name",
     "license": "ISC",
