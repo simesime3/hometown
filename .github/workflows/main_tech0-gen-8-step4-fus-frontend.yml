@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read 
 
     steps:
       - uses: actions/checkout@v4
@@ -22,16 +22,18 @@ jobs:
 
       - name: npm install, build, and test
         run: |
+          rm -rf node_modules  # node_modulesを削除
+          npm cache clean --force 
           npm install
           npm run build
-      - name: Copy artifact for deployment job    # 変更点➀
+      - name: Copy artifact for deployment job
         run: |
           mkdir -p deploy/.next/static  # ディレクトリを作成
           cp -r ./public ./deploy
           cp -r ./.next/static/. ./deploy/.next/static  # 静的ファイルをコピー
             
       - name: Zip artifact for deployment
-        run: zip release.zip ./deploy -r    # 変更点➁
+        run: zip release.zip ./deploy -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -61,6 +63,6 @@ jobs:
         with:
           app-name: 'tech0-gen-8-step4-fus-frontend'
           slot-name: 'Production'
-          package: ./deploy    # 変更点➂
+          package: ./deploy
 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_224BA24E05FC43C5BFA38F206A934058 }}
