@@ -20,12 +20,19 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: npm install, build, and test
+      - name: Clean up node_modules and reinstall dependencies
         run: |
           rm -rf node_modules  # node_modulesを削除
           npm cache clean --force 
+
+      - name: Reinstall Next.js
+        run: npm install next@latest
+
+      - name: npm install, build, and test
+        run: |
           npm install
           npm run build
+
       - name: Copy artifact for deployment job
         run: |
           mkdir -p deploy/.next/static  # ディレクトリを作成
