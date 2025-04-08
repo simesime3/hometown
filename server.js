@@ -1,20 +1,16 @@
-// server.js
 const express = require('express');
-const next = require('next');
+const path = require('path');
+const app = express();
 
-const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
-const handle = app.getRequestHandler();
+const PORT = process.env.PORT || 3000;
 
-app.prepare().then(() => {
-  const server = express();
+// build フォルダの中身を静的配信
+app.use(express.static(path.join(__dirname, 'build')));
 
-  server.all('*', (req, res) => {
-    return handle(req, res);
-  });
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
-  server.listen(3000, (err) => {
-    if (err) throw err;
-    console.log('> Ready on http://localhost:3000');
-  });
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
 });
