@@ -1,16 +1,24 @@
 const express = require('express');
-const path = require('path');
-const app = express();
+const next = require('next');
 
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev });
+const handle = app.getRequestHandler();
 
-// build フォルダの中身を静的配信
-app.use(express.static(path.join(__dirname, 'build')));
+app.prepare().then(() => {
+  const server = express();
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+  // ここにAPIなどあれば定義可能
+  // server.get('/api/hello', (req, res) => {
+  //   res.json({ message: 'Hello from custom server!' });
+  // });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  server.all('*', (req, res) => {
+    return handle(req, res);
+  });
+
+  server.listen(port, () => {
+    console.log(`> Ready on http://localhost:${port}`);
+  });
 });
