@@ -67,5 +67,5 @@ jobs:
         with:
           app-name: 'aps-temp-katsuma'
           slot-name: 'Production'
-          package: .
+          package: ./deploy 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_53B5A0DC53FE459E9C2FBC63F6477561 }}
