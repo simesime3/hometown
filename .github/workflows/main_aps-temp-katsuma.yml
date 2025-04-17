@@ -1,4 +1,7 @@
-name: Build and deploy Node.js app to Azure Web App - tech0-gen-8-step4-fus-frontend
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js app to Azure Web App - aps-temp-katsuma
 
 on:
   push:
@@ -10,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read 
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -20,27 +23,23 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Clean up node_modules and reinstall dependencies
-        run: |
-          rm -rf node_modules  # node_modulesを削除
-          npm cache clean --force 
-
-      - name: Reinstall Next.js
-        run: npm install next@latest
-
       - name: npm install, build, and test
         run: |
           npm install
-          npm run build
+          npm run build --if-present
+          npm run test --if-present
 
-      - name: Copy artifact for deployment job
+      - name: Copy artifact for deployment
         run: |
-          mkdir -p deploy/.next/static  # ディレクトリを作成
-          cp -r ./public ./deploy
-          cp -r ./.next/static/. ./deploy/.next/static  # 静的ファイルをコピー
-            
+          mkdir -p deploy/.next/static
+          cp -r .next deploy/
+          cp -r public deploy/
+          cp -r node_modules deploy/
+          cp -r src deploy/  
+          cp server.js package.json deploy/
+
       - name: Zip artifact for deployment
-        run: zip release.zip ./deploy -r
+        run: zip -r release.zip ./deploy
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -68,8 +67,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'tech0-gen-8-step4-fus-frontend'
+          app-name: 'aps-temp-katsuma'
           slot-name: 'Production'
-          package: ./deploy
-
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_224BA24E05FC43C5BFA38F206A934058 }}
+          package: release.zip
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_53B5A0DC53FE459E9C2FBC63F6477561 }}

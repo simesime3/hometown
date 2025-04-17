@@ -67,7 +67,7 @@ export default function Map() {
 
             const prefectureName = feature.properties.N03_001; // 都道府県名
             const cityName = feature.properties.N03_004; // 市区町村名
-
+            const cityId = feature.properties.N03_007; // 市区町村名
             const popupContent = `
               <div>
                 <h2>${prefectureName} ${cityName}</h2>
@@ -78,6 +78,7 @@ export default function Map() {
             openModal({
               prefectureName: prefectureName,
               cityName: cityName, 
+              cityId: cityId, 
               button1: 'この自治体のおうえんレポートを見る',
               button2: 'この自治体の返礼品を探す',
               button3: 'この自治体への旅行プランを探す',
