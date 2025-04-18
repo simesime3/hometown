@@ -27,17 +27,17 @@ export default function MapSearch({ onSearch, geojsonLayer, map }) {
     let found = false;
     geojsonLayer.eachLayer((layer) => {
       const { N03_001: prefectureName, N03_004: cityName } = layer.feature.properties;
-      const fullName = `${prefectureName} ${cityName}`.trim();
+      const fullName = `${prefectureName}${cityName}`.trim();
 
       // console.log(`Checking layer: ${fullName}`); // デバッグ用
 
-      // 完全一致で検索して移動
-      if (fullName === query) {
-        const bounds = layer.getBounds();
-        map.fitBounds(bounds, { padding: [50, 50] });
-        found = true;
-        return;
-      }
+      // // 完全一致で検索して移動
+      // if (fullName === query) {
+      //   const bounds = layer.getBounds();
+      //   map.fitBounds(bounds, { padding: [50, 50] });
+      //   found = true;
+      //   return;
+      // }
       
     });
 
@@ -60,7 +60,7 @@ export default function MapSearch({ onSearch, geojsonLayer, map }) {
     const matched = [];
     geojsonLayer.eachLayer((layer) => {
       const { N03_001: prefectureName, N03_004: cityName } = layer.feature.properties;
-      const fullName = `${prefectureName} ${cityName}`.trim();
+      const fullName = `${prefectureName}${cityName}`.trim();
 
       // console.log(`Layer name: ${fullName}`); // デバッグ用
 
