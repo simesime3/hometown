@@ -33,24 +33,26 @@ export default function Map() {
     setIsModalOpen(false);
   };
 
-function getColorBySocialDecrease(level) {
-  switch (level) {
-    case "高":
-      return "#1E3A8A"; // 濃い青 (高)
-    case "中":
-      return "#2563EB"; // 中程度の青 (中)
-    case "低":
-      return "#3B82F6"; // 明るい青 (低)
-    default:
-      return "white"; // データなし → グレー
+  function getColorBySocialDecrease(level) {
+    switch (level) {
+      case "高":
+        return "red"; // 赤
+      case "中":
+        return "bleu"; // 黄
+      case "低":
+        return "yellow"; // 青
+      default:
+        return "white"; // データなし → グレー
+    }
   }
-}
+
   // マップの初期化とデータのロード
   useEffect(() => {
     if (typeof window !== 'undefined' && !mapRef.current) {
-      const map = L.map('map', { scrollWheelZoom: true, attributionControl: false }).setView([38, 138], 5);
+      const map = L.map('map', { scrollWheelZoom: true, attributionControl: false }).setView([35.6895, 139.6917], 5);
       mapRef.current = map;
       setIsMapLoaded(true); // マップがロードされたことを記録
+
 
       // タイルレイヤーを追加
       L.tileLayer('https://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {
@@ -61,11 +63,64 @@ function getColorBySocialDecrease(level) {
       // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       // }).addTo(map);
+      console.log("map" );
 
+      geojsonLayerRef.current = L.geoJSON(null, {
+        style: (feature) => {
+          const cityId = feature.properties.N03_007;
+          const level = extinctionMapRef.current[cityId]; // "高", "中", "低"
+          console.log("level", level );
+          return {
+            fillColor: getColorBySocialDecrease(level),
+            fillOpacity: 0.7,
+            color: 'black',
+            weight: 1
+          };
+        },
+        onEachFeature: (feature, layer) => {
+          layer.on('click', (event) => {
+            const latlng = event.latlng;
+            // クリックされたエリアを赤色に変更
+            geojsonLayerRef.current.eachLayer((l) => {
+              l.setStyle({ fillColor: 'blue', fillOpacity: 0.1 }); // 全部リセット
+            });
+            layer.setStyle({ fillColor: 'red', fillOpacity: 0.5 }); // クリックしたエリアを赤にする
+
+            const prefectureName = feature.properties.N03_001; // 都道府県名
+            const cityName = feature.properties.N03_004; // 市区町村名
+            const cityId = feature.properties.N03_007; // 市区町村名
+            const possibility = extinctionMapRef.current[cityId];
+            const popupContent = `
+              <div>
+                <h2>${prefectureName}${cityName}</h2>
+                <p>消滅可能性: ${possibility ?? '不明'}</p>
+              </div>
+            `;
+            setPopupData({ latlng, content: popupContent });
+
+            openModal({
+              prefectureName: prefectureName,
+              cityName: cityName, 
+              cityId: cityId, 
+              button1: 'この自治体のおうえんレポートを見る',
+              button2: 'この自治体の返礼品を探す',
+              button3: 'この自治体への旅行プランを探す',
+              button4: 'この自治体の名所・名産品を見る',
+              // supportCount: `おうえん登録数: ${Math.floor(Math.random() * 200)}`,
+              // supportButton: '♡',
+              extinction: possibility ?? '不明',
+            });
+          });
+        }
+      }).addTo(map);
       setGeojsonLayer(geojsonLayerRef.current); 
 
       labelGroupRef.current = L.layerGroup().addTo(map);
       map.removeLayer(labelGroupRef.current);
+
+      function updateLabels() {
+        console.log("Updating labels...");
+      }
 
       // 市区町村一覧の初期化用
       const extinctionMap = {};
@@ -82,7 +137,6 @@ function getColorBySocialDecrease(level) {
         console.log("extinctionMapRef.current:", extinctionMapRef.current );
       })
       .catch(error => console.error('extinction.json 読み込み失敗:', error));
-      updateGeoJsonStyle();
 
      // 2. GeoJSON を読み込み
     fetch('/assets/data/japan-municipalities.geojson')
@@ -94,23 +148,10 @@ function getColorBySocialDecrease(level) {
       geojsonLayerRef.current = L.geoJSON(geoJsonData, {
         style: feature => {
           const cityId = feature.properties.N03_007;
-          
-          // extinctionMapRef.current のデータがまだ読み込まれていない場合に処理を遅延
-          if (!extinctionMapRef.current || !extinctionMapRef.current[cityId]) {
-            // console.error(`データが見つかりません: ${cityId}`);
-            return {
-              fillColor: 'white', // デフォルトの色
-              fillOpacity: 1.0,
-              color: 'black',
-              weight: 1
-            };
-          }
           const level = extinctionMapRef.current[cityId];
-          // console.log('level:', level);
-      
           return {
-            fillColor: getColorBySocialDecrease(level.社会減),
-            fillOpacity: 1.0,
+            fillColor: getColorBySocialDecrease(level),
+            fillOpacity: 0.7,
             color: 'black',
             weight: 1
           };
@@ -118,8 +159,10 @@ function getColorBySocialDecrease(level) {
         onEachFeature: (feature, layer) => {
           layer.on('click', (event) => {
             const latlng = event.latlng;
-            layer.setStyle({ fillColor: 'red', fillOpacity: 1.0 });
-            
+            geojsonLayerRef.current.eachLayer((l) => {
+              l.setStyle({ fillColor: 'blue', fillOpacity: 0.1 });
+            });
+            layer.setStyle({ fillColor: 'red', fillOpacity: 0.5 });
 
             const prefectureName = feature.properties.N03_001;
             const cityName = feature.properties.N03_004;
@@ -240,32 +283,6 @@ if (fullName.includes(searchTerm)) {
       console.log("Updated popupData:", popupData);
     }
   }, [popupData]);
-
-  const updateGeoJsonStyle = () => {
-    if (!geojsonLayerRef.current || !extinctionMapRef.current) return;
-  
-    geojsonLayerRef.current.setStyle(feature => {
-      const cityId = feature.properties.N03_007;
-      console.log("updateGeoJsonStyle:", cityId);
-  
-      if (!extinctionMapRef.current[cityId]) {
-        return {
-          fillColor: 'white',
-          fillOpacity: 1.0,
-          color: 'black',
-          weight: 1,
-        };
-      }
-  
-      const level = extinctionMapRef.current[cityId];
-      return {
-        fillColor: getColorBySocialDecrease(level.社会減),
-        fillOpacity: 1.0,
-        color: 'black',
-        weight: 1,
-      };
-    });
-  };
 
   return (
     <div className={styles.mapContainer}>
