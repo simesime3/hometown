@@ -86,7 +86,7 @@ export default function MapSearch({ onSearch, geojsonLayer, map }) {
         //     handleSearch(); // Enterキーで検索実行
         //   }
         // }}
-        style={{ padding: '5px', marginRight: '5px' }}
+        style={{ padding: '5px', marginRight: '5px', fontSize: '16px' }}
       />
       <button onClick={handleSearch}>検索</button>
 
