@@ -2,14 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import ReportForm from '../ReportForm/ReportForm'; // 作成した投稿フォーム
 
+// 利用する値をcityDetailsに変更
 const Report = ({ cityDetails }) => {
   const [reports, setReports] = useState([]);
   const [showForm, setShowForm] = useState(false); // 追加
-  const municipalityId = cityDetails?.id;
+  // const municipalityId = cityDetails?.id;
+  console.log("report data:", {cityDetails});
 
   const fetchReports = () => {
-    if (!municipalityId) return;
-    fetch(`http://localhost:5000/api/reports?municipality_id=${municipalityId}`)
+    if (!cityDetails.id) return;
+    fetch(`http://localhost:5000/api/reports/${cityDetails.id}`) 
       .then((res) => res.json())
       .then(setReports)
       .catch((err) => console.error("Error fetching reports:", err));
@@ -17,7 +19,7 @@ const Report = ({ cityDetails }) => {
 
   useEffect(() => {
     fetchReports();
-  }, [municipalityId]);
+  }, [cityDetails.id]);
 
   return (
     <div>
@@ -43,7 +45,7 @@ const Report = ({ cityDetails }) => {
       {/* 投稿フォーム表示 */}
       {showForm && (
         <div style={{ marginBottom: '2rem' }}>
-           <ReportForm municipalityId={municipalityId} onSuccess={fetchReports} />
+          <ReportForm cityDetailsId={cityDetails.id} onSuccess={fetchReports} />
         </div>
       )}
 

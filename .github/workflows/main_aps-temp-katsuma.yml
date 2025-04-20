@@ -31,15 +31,14 @@ jobs:
 
       - name: Copy artifact for deployment
         run: |
-          mkdir -p deploy/.next/static
-          cp -r .next deploy/
-          cp -r public deploy/
-          cp -r node_modules deploy/
-          cp -r src deploy/  
-          cp server.js package.json deploy/
+          mkdir -p .next/static
+          mkdir deploy_tmp
+          cp -r .next public node_modules src server.js package.json deploy_tmp/
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip ./deploy
+        run: |
+          cd deploy_tmp
+          zip -r ../release.zip .
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4

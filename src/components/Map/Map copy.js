@@ -42,7 +42,7 @@ export default function Map() {
       case "低":
         return "#2c7bb6"; // 青
       default:
-        return "white"; // データなし → グレー
+        return "#cccccc"; // データなし → グレー
     }
   }
 
@@ -124,95 +124,50 @@ export default function Map() {
       const extinctionMap = {};
       const extinctionMapRef = { current: extinctionMap };
 
-    // 1. extinction.json を読み込み
-    fetch('/assets/data/possibility_of_extinction.json')
-      .then(res => res.json())
-      .then(extinctionData => {
-        for (const cityId in extinctionData) {
-          extinctionMap[cityId] = extinctionData[cityId];
-        }
-        extinctionMapRef.current = extinctionMap;
-        console.log("extinctionMapRef.current:", extinctionMapRef.current );
-      })
-      .catch(error => console.error('extinction.json 読み込み失敗:', error));
+      fetch('/assets/data/possibility_of_extinction.json')
+        .then(res => res.json())
+        .then(data => {
+          // データ構造が例: { "01234": "高い", "56789": "低い" } のようになっていると仮定
+          for (const cityId in data) {
+            extinctionMap[cityId] = data[cityId];
+          }
+          extinctionMapRef.current = extinctionMap;
 
-     // 2. GeoJSON を読み込み
-    fetch('/assets/data/japan-municipalities.geojson')
-    .then(res => {
-      if (!res.ok) throw new Error('GeoJSONの読み込みに失敗しました');
-      return res.json();
-    })
-    .then(geoJsonData => {
-      geojsonLayerRef.current = L.geoJSON(geoJsonData, {
-        style: feature => {
-          const cityId = feature.properties.N03_007;
-          const level = extinctionMapRef.current[cityId];
-          return {
-            fillColor: getColorBySocialDecrease(level),
-            fillOpacity: 0.7,
-            color: 'black',
-            weight: 1
-          };
-        },
-        onEachFeature: (feature, layer) => {
-          layer.on('click', (event) => {
-            const latlng = event.latlng;
-            geojsonLayerRef.current.eachLayer((l) => {
-              l.setStyle({ fillColor: 'blue', fillOpacity: 0.1 });
-            });
-            layer.setStyle({ fillColor: 'red', fillOpacity: 0.5 });
+          // GeoJSONを読み込む（extinctionMapが初期化されてから）
+          return fetch('/assets/data/japan-municipalities.geojson');
+        })
+      .catch(error => console.error('Error:', error));
 
-            const prefectureName = feature.properties.N03_001;
-            const cityName = feature.properties.N03_004;
-            const cityId = feature.properties.N03_007;
-            const possibility = extinctionMapRef.current[cityId];
+      // GeoJSONファイルをロードして、地図に追加
+      fetch('/assets/data/japan-municipalities.geojson')
+        .then(response => {
+          if (!response.ok) throw new Error('GeoJSONの読み込みに失敗しました');
+          return response.json();
+        })
+        .then(data => {
+          geojsonLayerRef.current.addData(data);
+          updateLabels();
 
-            setPopupData({
-              latlng,
-              content: `
-                <div>
-                  <h2>${prefectureName}${cityName}</h2>
-                  <p>消滅可能性: ${possibility ?? '不明'}</p>
-                </div>
-              `
-            });
+          const extractedMunicipalities = data.features.map(feature => {
+            const prefectureName = feature.properties.N03_001; // 都道府県名
+            const cityName = feature.properties.N03_004; // 市区町村名
+            let coords = feature.geometry.coordinates;
 
-            openModal({
-              prefectureName,
-              cityName,
-              cityId,
-              button1: 'この自治体のおうえんレポートを見る',
-              button2: 'この自治体の返礼品を探す',
-              button3: 'この自治体への旅行プランを探す',
-              button4: 'この自治体の名所・名産品を見る',
-              extinction: possibility ?? '不明',
-            });
+            // Polygon 形式の場合の処理
+            if (Array.isArray(coords) && Array.isArray(coords[0])) {
+              coords = coords[0][0];
+            }
+
+            return {
+              name: cityName,
+              fullName: `${prefectureName} ${cityName}`.trim(),
+              coords: Array.isArray(coords) ? [coords[1], coords[0]] : undefined
+            };
           });
-        }
-      }).addTo(map);
 
-      setGeojsonLayer(geojsonLayerRef.current);
-
-      // ラベル表示の処理
-      const extractedMunicipalities = geoJsonData.features.map(feature => {
-        const prefectureName = feature.properties.N03_001;
-        const cityName = feature.properties.N03_004;
-        let coords = feature.geometry.coordinates;
-
-        if (Array.isArray(coords) && Array.isArray(coords[0])) {
-          coords = coords[0][0];
-        }
-
-        return {
-          name: cityName,
-          fullName: `${prefectureName} ${cityName}`.trim(),
-          coords: Array.isArray(coords) ? [coords[1], coords[0]] : undefined
-        };
-      });
-
-      setMunicipalities(extractedMunicipalities);
-    })
-    .catch(error => console.error('GeoJSON 読み込み失敗:', error));
+          setMunicipalities(extractedMunicipalities);
+        })
+        .catch(error => console.error('Error:', error));
 
       const zoomThreshold = 8;
       map.on('zoomend', () => {
