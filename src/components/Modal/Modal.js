@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './Modal.module.css';
 import Information from '../Information/Information'; // Informationコンポーネントをインポート
 
@@ -8,62 +8,43 @@ function Modal({ isOpen, onClose, data }) {
   const [loading, setLoading] = useState(false);
   const [selectedButton, setSelectedButton] = useState(null); // どのボタンが選ばれたかを管理
 
-  // ダミーデータ（API呼び出しの代わり）
+  const fetchCityDetails = async () => {
+    if (!data.cityName || !data.prefectureName || !data.cityId) return;
+  
+    const cityDetails = {
+      id: data.cityId,
+      name: data.cityName,
+      prefectureName: data.prefectureName,
+      // 必要ならここに追加データも
+    };
+  
+    setCityDetails(cityDetails);
+    setShowInformation(true);
+    setLoading(false);
+  };
+
+  // 本番よう
   // const fetchCityDetails = async () => {
+  //   console.log("Modal data:", data);
   //   if (!data.cityName) return;
+  //   console.log("APIリクエスト送信:", `/api/municipality/${data.cityName}`);
 
   //   try {
   //     setLoading(true);
-  //     console.log("data:",data);
+  //     const response = await fetch(`http://127.0.0.1:8000/api/municipality/${data.cityName}`);
+  //     // const response = await fetch(`http://127.0.0.1:8000/api/municipality?city=${cityName}&prefecture=${prefectureName}`);
+  //     const fetchedData = await response.json(); // Renamed from data to fetchedData
 
-  //     // ダミーデータ
-  //     const mockCityDetails = {
-  //       prefectureName: data.prefectureName,
-  //       name: data.cityName,
-  //       description: "これはモックデータです。",
-  //       additionalInfo: "追加情報はありません。追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません追加情報はありません",
-  //       image: "/assets/images/image1.jpg"
-  //     };
-
-  //     setTimeout(() => {
-  //       setCityDetails(mockCityDetails);
+  //     if (!fetchedData.error) {
+  //       setCityDetails(fetchedData); // Save the fetched data
   //       setShowInformation(true);
-  //       setLoading(false);
-  //     }, 500); // 擬似的なロード時間
+  //     }
   //   } catch (error) {
   //     console.error("エラー発生:", error);
+  //   } finally {
   //     setLoading(false);
   //   }
   // };
-
-  // 本番用
-  const fetchCityDetails = async () => {
-    console.log("Modal data:", data);
-    if (!data.cityId) return;
-    console.log("APIリクエスト送信:", `http://localhost:5000/api/municipality/${data.cityId}`);
-  
-    try {
-      setLoading(true);  // ローディング状態を設定
-      const res = await fetch(`http://localhost:5000/api/municipality/${data.cityId}`);
-      if (!res.ok) {
-        const text = await res.text(); // エラー内容を確認
-        console.error("エラーHTML:", text);
-        throw new Error(`APIリクエスト失敗: ${res.status}`);
-      }
-  
-      const cityDetails = await res.json();  // レスポンスをJSONに変換
-      console.log("取得した市町村の詳細:", cityDetails);
-
-      setTimeout(() => {
-        setCityDetails(cityDetails);
-        setShowInformation(true);
-        setLoading(false);
-      }, 500); // 擬似的なロード時間
-    } catch (error) {
-      console.error("エラー発生:", error);
-      setLoading(false);
-    }
-  };
 
   // ボタンがクリックされた時にselectedButtonを更新
   const handleButtonClick = (buttonName) => {

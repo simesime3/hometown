@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
 
-const ReportForm = ({ cityDetailsId, onSuccess }) => {
+const ReportForm = ({ municipalityId, onSuccess }) => {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [image, setImage] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("reportfrom data:", {cityDetailsId});
 
     const formData = new FormData();
     formData.append('user_id', '1');
-    formData.append('municipality_id', parseInt(cityDetailsId));// 変更
+    formData.append('municipality_id', municipalityId);
     formData.append('title', title);
     formData.append('body', body);
     if (image) {
       formData.append('image', image);
     }
-    console.log("formData:", {formData});
 
     const res = await fetch('http://localhost:5000/api/reports', {
       method: 'POST',
@@ -105,3 +103,4 @@ const ReportForm = ({ cityDetailsId, onSuccess }) => {
 };
 
 export default ReportForm;
+
