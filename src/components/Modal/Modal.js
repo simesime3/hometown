@@ -8,28 +8,19 @@ function Modal({ isOpen, onClose, data }) {
   const [loading, setLoading] = useState(false);
   const [selectedButton, setSelectedButton] = useState(null); // どのボタンが選ばれたかを管理
 
-  // ダミーデータ（API呼び出しの代わり）
   const fetchCityDetails = async () => {
-    if (!data.cityName) return;
-
-    try {
-      setLoading(true);
-
-      // ダミーデータ
-      const mockCityDetails = {
-        id: "01213", // ← 仮に追加（苫小牧市のmunicipality_id）
-        
-      };
-
-      setTimeout(() => {
-        setCityDetails(mockCityDetails);
-        setShowInformation(true);
-        setLoading(false);
-      }, 500); // 擬似的なロード時間
-    } catch (error) {
-      console.error("エラー発生:", error);
-      setLoading(false);
-    }
+    if (!data.cityName || !data.prefectureName || !data.cityId) return;
+  
+    const cityDetails = {
+      id: data.cityId,
+      name: data.cityName,
+      prefectureName: data.prefectureName,
+      // 必要ならここに追加データも
+    };
+  
+    setCityDetails(cityDetails);
+    setShowInformation(true);
+    setLoading(false);
   };
 
   // 本番よう
