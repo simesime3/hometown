@@ -8,6 +8,20 @@ import Modal from '../Modal/Modal';
 import Popup from '../Popup/Popup';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import MapSearch from '../MapSearch/MapSearch';
+import { levelMap } from '../data/levelMap_with_nulls';
+
+// ✅ 追加: レベル→確率表現変換関数
+function getExtinctionProbability(level) {
+  switch (level) {
+    case 1: return '0％';
+    case 2: return '0～20％';
+    case 3: return '20～40％';
+    case 4: return '40～60％';
+    case 5: return '60～80％';
+    case 6: return '80％以上';
+    default: return '未設定';
+  }
+}
 
 export default function Map() {
   const mapRef = useRef(null);
@@ -19,159 +33,130 @@ export default function Map() {
   const [municipalities, setMunicipalities] = useState([]);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [geojsonLayer, setGeojsonLayer] = useState(null);
-  const extinctionMapRef = useRef({});
-  const socialDecreaseMapRef = useRef({});
 
-  // モーダルを開く関数
   const openModal = (content) => {
     setModalContent(content);
     setIsModalOpen(true);
   };
 
-  // モーダルを閉じる関数
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-function getColorBySocialDecrease(level) {
-  switch (level) {
-    case "高":
-      return "#1E3A8A"; // 濃い青 (高)
-    case "中":
-      return "#2563EB"; // 中程度の青 (中)
-    case "低":
-      return "#3B82F6"; // 明るい青 (低)
-    default:
-      return "white"; // データなし → グレー
+  function getColorByLevel(level) {
+    switch (level) {
+      case 1: return '#00BB00';
+      case 2: return '#E6E6FA';
+      case 3: return '#6495ED';
+      case 4: return '#4169E1';
+      case 5: return '#0000CD';
+      case 6: return '#000022';
+      default: return '#cccccc';
+    }
   }
-}
-  // マップの初期化とデータのロード
+
   useEffect(() => {
     if (typeof window !== 'undefined' && !mapRef.current) {
-      const map = L.map('map', { scrollWheelZoom: true, attributionControl: false }).setView([38, 138], 5);
+      const map = L.map('map', { scrollWheelZoom: true, attributionControl: false }).setView([35.6895, 139.6917], 5);
       mapRef.current = map;
-      setIsMapLoaded(true); // マップがロードされたことを記録
+      setIsMapLoaded(true);
 
-      // タイルレイヤーを追加
       L.tileLayer('https://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://stamen.com">Stamen Design</a>, &copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
       }).addTo(map);
 
-      // エラーなしタイル
-      // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      // }).addTo(map);
-
-      setGeojsonLayer(geojsonLayerRef.current); 
+      geojsonLayerRef.current = L.geoJSON(null).addTo(map);
+      setGeojsonLayer(geojsonLayerRef.current);
 
       labelGroupRef.current = L.layerGroup().addTo(map);
       map.removeLayer(labelGroupRef.current);
 
-      // 市区町村一覧の初期化用
-      const extinctionMap = {};
-      const extinctionMapRef = { current: extinctionMap };
+      fetch('/assets/data/japan-municipalities.geojson')
+        .then(res => {
+          if (!res.ok) throw new Error('GeoJSONの読み込みに失敗しました');
+          return res.json();
+        })
+        .then(geoJsonData => {
+          geojsonLayerRef.current = L.geoJSON(geoJsonData, {
+            style: feature => {
+              const cityId = feature.properties.N03_007?.toString().padStart(5, '0');
+              const level = levelMap[cityId];
+              return {
+                fillColor: getColorByLevel(level),
+                fillOpacity: 0.7,
+                color: 'black',
+                weight: 1
+              };
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (event) => {
+                const latlng = event.latlng;
 
-    // 1. extinction.json を読み込み
-    fetch('/assets/data/possibility_of_extinction.json')
-      .then(res => res.json())
-      .then(extinctionData => {
-        for (const cityId in extinctionData) {
-          extinctionMap[cityId] = extinctionData[cityId];
-        }
-        extinctionMapRef.current = extinctionMap;
-        console.log("extinctionMapRef.current:", extinctionMapRef.current );
-      })
-      .catch(error => console.error('extinction.json 読み込み失敗:', error));
-      updateGeoJsonStyle();
+                geojsonLayerRef.current.eachLayer((l) => {
+                  const cityId = l.feature.properties.N03_007?.toString().padStart(5, '0');
+                  const level = levelMap[cityId];
+                  l.setStyle({
+                    fillColor: getColorByLevel(level),
+                    fillOpacity: 0.7,
+                    color: 'black',
+                    weight: 1
+                  });
+                });
 
-     // 2. GeoJSON を読み込み
-    fetch('/assets/data/japan-municipalities.geojson')
-    .then(res => {
-      if (!res.ok) throw new Error('GeoJSONの読み込みに失敗しました');
-      return res.json();
-    })
-    .then(geoJsonData => {
-      geojsonLayerRef.current = L.geoJSON(geoJsonData, {
-        style: feature => {
-          const cityId = feature.properties.N03_007;
-          
-          // extinctionMapRef.current のデータがまだ読み込まれていない場合に処理を遅延
-          if (!extinctionMapRef.current || !extinctionMapRef.current[cityId]) {
-            // console.error(`データが見つかりません: ${cityId}`);
-            return {
-              fillColor: 'white', // デフォルトの色
-              fillOpacity: 1.0,
-              color: 'black',
-              weight: 1
-            };
-          }
-          const level = extinctionMapRef.current[cityId];
-          // console.log('level:', level);
-      
-          return {
-            fillColor: getColorBySocialDecrease(level.社会減),
-            fillOpacity: 1.0,
-            color: 'black',
-            weight: 1
-          };
-        },
-        onEachFeature: (feature, layer) => {
-          layer.on('click', (event) => {
-            const latlng = event.latlng;
-            layer.setStyle({ fillColor: 'red', fillOpacity: 1.0 });
-            
+                layer.setStyle({ fillColor: 'red', fillOpacity: 0.5 });
 
+                const prefectureName = feature.properties.N03_001;
+                const cityName = feature.properties.N03_004;
+                const subCityName = feature.properties.N03_003 || '';
+                const cityId = feature.properties.N03_007?.toString().padStart(5, '0');
+                const level = levelMap[cityId];
+
+                // ✅ 修正: 表示を「2050年の消滅可能性: ～％」に変更
+                setPopupData({
+                  latlng,
+                  content: `
+                    <div>
+                      <h2>${prefectureName}${cityName}</h2>
+                      <p>2050年の消滅可能性: ${getExtinctionProbability(level)}</p>
+                    </div>
+                  `
+                });
+
+                openModal({
+                  prefectureName,
+                  cityName,
+                  cityId,
+                  button1: 'この自治体のおうえんレポートを見る',
+                  button2: 'この自治体の返礼品を探す',
+                  button3: 'この自治体への旅行プランを探す',
+                  button4: 'この自治体の名産品・観光地を見る',
+                  extinction: level ?? '未設定',
+                });
+              });
+            }
+          }).addTo(map);
+
+          setGeojsonLayer(geojsonLayerRef.current);
+
+          const extractedMunicipalities = geoJsonData.features.map(feature => {
             const prefectureName = feature.properties.N03_001;
             const cityName = feature.properties.N03_004;
-            const cityId = feature.properties.N03_007;
-            const possibility = extinctionMapRef.current[cityId];
+            let coords = feature.geometry.coordinates;
 
-            setPopupData({
-              latlng,
-              content: `
-                <div>
-                  <h2>${prefectureName}${cityName}</h2>
-                  <p>消滅可能性: ${possibility ?? '不明'}</p>
-                </div>
-              `
-            });
+            if (Array.isArray(coords) && Array.isArray(coords[0])) {
+              coords = coords[0][0];
+            }
 
-            openModal({
-              prefectureName,
-              cityName,
-              cityId,
-              button1: 'この自治体のおうえんレポートを見る',
-              button2: 'この自治体の返礼品を探す',
-              button3: 'この自治体への旅行プランを探す',
-              button4: 'この自治体の名所・名産品を見る',
-              extinction: possibility ?? '不明',
-            });
+            return {
+              name: cityName,
+              fullName: `${prefectureName} ${cityName}`.trim(),
+              coords: Array.isArray(coords) ? [coords[1], coords[0]] : undefined
+            };
           });
-        }
-      }).addTo(map);
 
-      setGeojsonLayer(geojsonLayerRef.current);
-
-      // ラベル表示の処理
-      const extractedMunicipalities = geoJsonData.features.map(feature => {
-        const prefectureName = feature.properties.N03_001;
-        const cityName = feature.properties.N03_004;
-        let coords = feature.geometry.coordinates;
-
-        if (Array.isArray(coords) && Array.isArray(coords[0])) {
-          coords = coords[0][0];
-        }
-
-        return {
-          name: cityName,
-          fullName: `${prefectureName} ${cityName}`.trim(),
-          coords: Array.isArray(coords) ? [coords[1], coords[0]] : undefined
-        };
-      });
-
-      setMunicipalities(extractedMunicipalities);
-    })
-    .catch(error => console.error('GeoJSON 読み込み失敗:', error));
+          setMunicipalities(extractedMunicipalities);
+        })
+        .catch(error => console.error('GeoJSON 読み込み失敗:', error));
 
       const zoomThreshold = 8;
       map.on('zoomend', () => {
@@ -194,83 +179,44 @@ function getColorBySocialDecrease(level) {
     }
   }, []);
 
-  // 検索処理を定義
   const handleSearch = (searchTerm) => {
-    console.log('検索ワード:', searchTerm);
-  
-    if (!mapRef.current || !geojsonLayerRef.current) {
-      console.error('Map または GeoJSON データがまだロードされていません');
-      return;
-    }
-  
+    if (!mapRef.current || !geojsonLayerRef.current) return;
+
     let found = false;
     geojsonLayerRef.current.eachLayer((layer) => {
       const { N03_001: prefectureName, N03_004: cityName } = layer.feature.properties;
       const fullName = `${prefectureName}${cityName}`.trim();
-  
-// 例: 特定のレイヤーをクリックしたときに、画面の上から1/4の場所に合わせる
-if (fullName.includes(searchTerm)) {
-  const bounds = layer.getBounds();
-  mapRef.current.invalidateSize();
-  
-  // まず、fitBoundsでズームと位置を設定
-  mapRef.current.fitBounds(bounds, {
-    paddingTopLeft: [20, -250],   // 左上方向に少し余裕
-    paddingBottomRight: [20, 20], // 右下は小さめに
-    maxZoom: 10,
-  });
 
-  // 500ms後にクリックイベントを手動で発火
-  setTimeout(() => {
-    layer.fire('click');  // クリックイベントを再現！
-  }, 500);
-
-  found = true;
-}
+      if (fullName.includes(searchTerm)) {
+        const bounds = layer.getBounds();
+        mapRef.current.invalidateSize();
+        mapRef.current.fitBounds(bounds, {
+          paddingTopLeft: [20, -250],
+          paddingBottomRight: [20, 20],
+          maxZoom: 10,
+        });
+        setTimeout(() => {
+          layer.fire('click');
+        }, 500);
+        found = true;
+      }
     });
-  
+
     if (!found) {
       console.warn('一致する自治体が見つかりませんでした');
     }
   };
 
-  // popupData の変更を監視してログを出力
   useEffect(() => {
     if (popupData) {
       console.log("Updated popupData:", popupData);
     }
   }, [popupData]);
 
-  const updateGeoJsonStyle = () => {
-    if (!geojsonLayerRef.current || !extinctionMapRef.current) return;
-  
-    geojsonLayerRef.current.setStyle(feature => {
-      const cityId = feature.properties.N03_007;
-      console.log("updateGeoJsonStyle:", cityId);
-  
-      if (!extinctionMapRef.current[cityId]) {
-        return {
-          fillColor: 'white',
-          fillOpacity: 1.0,
-          color: 'black',
-          weight: 1,
-        };
-      }
-  
-      const level = extinctionMapRef.current[cityId];
-      return {
-        fillColor: getColorBySocialDecrease(level.社会減),
-        fillOpacity: 1.0,
-        color: 'black',
-        weight: 1,
-      };
-    });
-  };
-
   return (
     <div className={styles.mapContainer}>
       <div id="map" className={styles.map}></div>
- {isMapLoaded && geojsonLayer && <MapSearch geojsonLayer={geojsonLayer} map={mapRef.current} onSearch={handleSearch} />}
+      {isMapLoaded && geojsonLayer && <MapSearch geojsonLayer={geojsonLayer} map={mapRef.current} onSearch={handleSearch} />}
       <Modal isOpen={isModalOpen} onClose={closeModal} data={modalContent} />
       {popupData && <Popup map={mapRef.current} {...popupData} />}
     </div>
