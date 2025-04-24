@@ -1,68 +1,50 @@
-import { useState, useEffect } from 'react';
+// ✅ Famous.js（修正済）
+import React from 'react';
 
 const Famous = ({ cityDetails }) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  if (!cityDetails || !cityDetails.description) {
+    return <p>この自治体の情報を取得できませんでした。</p>;
+  }
 
-  useEffect(() => {
+  const {
+    description,
+    specialties = [],
+    sightseeing = [],
+    image
+  } = cityDetails;
 
-    const prefecture = cityDetails?.prefecture;
-    const cityName = cityDetails?.cityName || cityDetails?.name;
-    const subCityName = cityDetails?.sub_city || '';
-    console.log("📍 cityDetails用リクエスト:", cityDetails);
-  
-    console.log("📍 Famous用リクエスト1:", prefecture, cityName);
-
-    if (!prefecture || !cityName) {
-      console.warn("⚠️ 都道府県名 または 市区町村名 が存在しません:", cityDetails);
-      return;
-    }
-
-  
-    const fetchFamousData = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const query = new URLSearchParams({
-          prefecture: prefecture,
-          sub_city: subCityName,
-          city: cityName
-        });
-  
-        const response = await fetch(`http://localhost:5000/api/famous?${query}`);
-        if (!response.ok) throw new Error('データの取得に失敗しました');
-        const fetchedData = await response.json();
-        setData(fetchedData);
-      } catch (err) {
-        console.error(err);
-        setError('データの取得中にエラーが発生しました');
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchFamousData();
-  }, [cityDetails]);
   return (
     <div>
-      {loading && <p>読み込み中...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {data && (
-        <div>
-          <h2>紹介文</h2>
-          <p>{data.description}</p>
+      <h3>この自治体の紹介</h3>
+      <p style={{ whiteSpace: 'pre-wrap' }}>{description}</p>
 
-          <h2>名所・名産品</h2>
-          {data.highlights?.length > 0 ? (
-            <ul>
-              {data.highlights.map((highlight, index) => (
-                <li key={index}>{highlight.name}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>情報が見つかりませんでした。</p>
-          )}
+      <br />
+
+      <h3>名産品</h3>
+      <ul>
+        {specialties.map((item, idx) => (
+          <li key={`sp-${idx}`}>{item}</li>
+        ))}
+      </ul>
+
+      <br />
+
+      <h3>観光地</h3>
+      <ul>
+        {sightseeing.map((item, idx) => (
+          <li key={`sight-${idx}`}>{item}</li>
+        ))}
+      </ul>
+
+      {/* ✅ 画像がある場合は表示 */}
+      {image && (
+        <div style={{ marginTop: '1rem' }}>
+          <h3>イメージイラスト</h3>
+          <img
+            src={image}
+            alt={`${cityDetails.name}の風景`}
+            style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '0.5rem' }}
+          />
         </div>
       )}
     </div>
